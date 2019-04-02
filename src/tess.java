@@ -31,7 +31,7 @@ System.err.println(e.getMessage());
  */
         String inputFilePath = "C:\\Users\\ewa\\Desktop\\tesseract\\biedronka_kod_systemowy.tif";
         Tesseract instance = new Tesseract();
-        instance.setDatapath("C:\\Users\\ewa\\Desktop\\tesseract\\");
+        instance.setDatapath("C:\\Users\\ewa\\Desktop\\tesseract");
         instance.setLanguage("pol");
         
         String fullText = instance.doOCR(new File(inputFilePath));
