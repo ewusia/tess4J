@@ -1,13 +1,18 @@
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JTextField;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
+import org.apache.commons.io.FileUtils;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -45,6 +50,8 @@ public class Makieta extends javax.swing.JFrame {
         jButtonZapisz = new javax.swing.JButton();
         jButtonZakoncz = new javax.swing.JButton();
         jButtonWczytajParagon = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTextAreaProdukty = new javax.swing.JTextArea();
 
         jFileChooserZapiszPlik.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
         jFileChooserZapiszPlik.setApproveButtonText("Zapisz");
@@ -83,6 +90,10 @@ public class Makieta extends javax.swing.JFrame {
             }
         });
 
+        jTextAreaProdukty.setColumns(20);
+        jTextAreaProdukty.setRows(5);
+        jScrollPane2.setViewportView(jTextAreaProdukty);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -90,23 +101,27 @@ public class Makieta extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButtonOtworz)
-                        .addGap(44, 44, 44)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jButtonOtworz, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButtonWczytajParagon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButtonZapisz)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 162, Short.MAX_VALUE)
-                        .addComponent(jButtonZakoncz))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButtonWczytajParagon)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 346, Short.MAX_VALUE)
+                        .addComponent(jButtonZakoncz)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButtonWczytajParagon)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -126,12 +141,23 @@ public class Makieta extends javax.swing.JFrame {
             File file = jFileChooserOtworzPlik.getSelectedFile();
             try {
                 jTextArea1.read( new FileReader( file.getAbsolutePath() ), null );
+            // test dla pattern
+                String str = FileUtils.readFileToString(file, "UTF-8");
+                Pattern pattern = Pattern.compile("P[AH]R[AH]GON");
+                Matcher matcher = pattern.matcher(str);
+                if (matcher.find()) {
+                     //System.out.println(matcher.group(0)); //prints /{item}/
+                    jTextAreaProdukty.append(matcher.group(0));
+                } else {
+                     jTextAreaProdukty.append("Match not found");
+                }
+            // koniec testu dla pattern
             } catch (IOException e) {
                 System.out.println("Nie mogę otworzyć pliku: "+file.getAbsolutePath());
                 System.out.println("Problem: "+e);
             }
         }
-
+ 
     }//GEN-LAST:event_jButtonOtworzActionPerformed
 
     private void jButtonZapiszActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonZapiszActionPerformed
@@ -141,7 +167,7 @@ public class Makieta extends javax.swing.JFrame {
             try {
                 FileWriter out = new FileWriter(file);
                 out.write(jTextArea1.getText());
-                out.close();
+                out.close();               
             } catch (IOException e) {
                 System.out.println("Nie mogę zapisać pliku: "+file.getAbsolutePath());
                 System.out.println("Problem: "+e);
@@ -169,13 +195,33 @@ public class Makieta extends javax.swing.JFrame {
             try {
                 fullText = instance.doOCR(file);
                 jTextArea1.append(fullText);
+                
+                Pattern pattern = Pattern.compile("P[AH]R[AH]GON"); //  [abcde] Jedna z liter: a, b, c, d lub e
+                Matcher matcher = pattern.matcher(fullText);
+                if (matcher.find()) {
+                     //System.out.println(matcher.group(0)); //prints /{item}/
+                    jTextAreaProdukty.append(matcher.group(0));
+                } else {
+                     jTextAreaProdukty.append("Match not found");
+                }
             } catch (TesseractException ex) {
                 Logger.getLogger(Makieta.class.getName()).log(Level.SEVERE, null, ex);
-            }           
+            }              
         }
         
     }//GEN-LAST:event_jButtonWczytajParagonActionPerformed
+    
+    private void findPattern(String text) {
 
+        Pattern pattern = Pattern.compile("PARAGON");
+        Matcher matcher = pattern.matcher(text);
+        if (matcher.find()) {
+            System.out.println(matcher.group(0)); //prints /{item}/
+        } else {
+            System.out.println("Match not found");
+        }
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -219,6 +265,8 @@ public class Makieta extends javax.swing.JFrame {
     private javax.swing.JFileChooser jFileChooserOtworzPlik;
     private javax.swing.JFileChooser jFileChooserZapiszPlik;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextArea jTextAreaProdukty;
     // End of variables declaration//GEN-END:variables
 }
