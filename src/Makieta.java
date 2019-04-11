@@ -143,14 +143,7 @@ public class Makieta extends javax.swing.JFrame {
                 jTextArea1.read( new FileReader( file.getAbsolutePath() ), null );
             // test dla pattern
                 String str = FileUtils.readFileToString(file, "UTF-8");
-                Pattern pattern = Pattern.compile("P[AH]R[AH]GON");
-                Matcher matcher = pattern.matcher(str);
-                if (matcher.find()) {
-                     //System.out.println(matcher.group(0)); //prints /{item}/
-                    jTextAreaProdukty.append(matcher.group(0));
-                } else {
-                     jTextAreaProdukty.append("Match not found");
-                }
+                findPattern(str);
             // koniec testu dla pattern
             } catch (IOException e) {
                 System.out.println("Nie mogę otworzyć pliku: "+file.getAbsolutePath());
@@ -195,30 +188,21 @@ public class Makieta extends javax.swing.JFrame {
             try {
                 fullText = instance.doOCR(file);
                 jTextArea1.append(fullText);
-                
-                Pattern pattern = Pattern.compile("P[AH]R[AH]GON"); //  [abcde] Jedna z liter: a, b, c, d lub e
-                Matcher matcher = pattern.matcher(fullText);
-                if (matcher.find()) {
-                     //System.out.println(matcher.group(0)); //prints /{item}/
-                    jTextAreaProdukty.append(matcher.group(0));
-                } else {
-                     jTextAreaProdukty.append("Match not found");
-                }
+                findPattern(fullText);
             } catch (TesseractException ex) {
                 Logger.getLogger(Makieta.class.getName()).log(Level.SEVERE, null, ex);
             }              
-        }
-        
+        }       
     }//GEN-LAST:event_jButtonWczytajParagonActionPerformed
     
     private void findPattern(String text) {
 
-        Pattern pattern = Pattern.compile("PARAGON");
+        Pattern pattern = Pattern.compile("P[AH]R[AH]GON");
         Matcher matcher = pattern.matcher(text);
         if (matcher.find()) {
-            System.out.println(matcher.group(0)); //prints /{item}/
+            jTextAreaProdukty.append(matcher.group(0)); //prints /{item}/
         } else {
-            System.out.println("Match not found");
+            jTextAreaProdukty.append("Nie znaleziono wzorca");
         }
     }
     
