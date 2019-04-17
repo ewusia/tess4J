@@ -1,10 +1,13 @@
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -145,9 +148,9 @@ public class Makieta extends javax.swing.JFrame {
                 String str = FileUtils.readFileToString(file, "UTF-8");
                 findPattern(str);
             // koniec testu dla pattern
-            } catch (IOException e) {
+            } catch (IOException ex) {
                 System.out.println("Nie mogę otworzyć pliku: "+file.getAbsolutePath());
-                System.out.println("Problem: "+e);
+                System.out.println("Problem: "+ex);
             }
         }
  
@@ -161,9 +164,9 @@ public class Makieta extends javax.swing.JFrame {
                 FileWriter out = new FileWriter(file);
                 out.write(jTextArea1.getText());
                 out.close();               
-            } catch (IOException e) {
+            } catch (IOException ex) {
                 System.out.println("Nie mogę zapisać pliku: "+file.getAbsolutePath());
-                System.out.println("Problem: "+e);
+                System.out.println("Problem: "+ex);
             }
         }
         /*FileWriter out = new FileWriter(file);
@@ -188,7 +191,8 @@ public class Makieta extends javax.swing.JFrame {
             try {
                 fullText = instance.doOCR(file);
                 jTextArea1.append(fullText);
-                findPattern(fullText);
+                zapiszOCRdoPliku(file, fullText);
+                findPattern(fullText);                
             } catch (TesseractException ex) {
                 Logger.getLogger(Makieta.class.getName()).log(Level.SEVERE, null, ex);
             }              
@@ -197,15 +201,51 @@ public class Makieta extends javax.swing.JFrame {
     
     private void findPattern(String text) {
 
+        String foundPattern = null;
         Pattern pattern = Pattern.compile("P[AH]R[AH]GON");
         Matcher matcher = pattern.matcher(text);
         if (matcher.find()) {
-            jTextAreaProdukty.append(matcher.group(0)); //prints /{item}/
+            foundPattern = matcher.group(0);
+            jTextAreaProdukty.append(foundPattern); //prints /{item}/
         } else {
             jTextAreaProdukty.append("Nie znaleziono wzorca");
         }
+        //return foundPattern;
     }
     
+    public void zapiszOCRdoPliku(File file, String text) {
+        
+        try {
+            PrintWriter zapis = new PrintWriter("OCRdoPliku.txt");
+            zapis.println(text);
+            zapis.close();
+        } catch (FileNotFoundException ex) {
+            System.out.println("Nie mogę zapisać pliku: "+file.getAbsolutePath());
+            System.out.println("Problem: "+ex);
+        }         
+    }
+    
+    public void ScannerFindInLine(File file, String foundPattern) throws FileNotFoundException {
+        
+        Scanner scan = new Scanner(file);
+
+		// iterate through the file line by line
+		while(scan.hasNextLine()){
+			// scan for names on the content of the file			
+				String str = scan.findInLine("P[AH]R[AH]GON");
+				if(str != null){
+					// print the string content that satisfies the pattern 
+					// specified on the method argument
+					System.out.println(str);
+				}
+			// advance to the next line
+			scan.nextLine();
+		}
+		// close the scanner object;		
+		scan.close();	
+
+    }
+       
     /**
      * @param args the command line arguments
      */
