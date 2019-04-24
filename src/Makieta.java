@@ -176,75 +176,73 @@ public class Makieta extends javax.swing.JFrame {
             try {
                 fullText = instance.doOCR(file);
                 jTextArea1.append(fullText);
-                zapiszOCRdoPliku(file, fullText);
-                findPattern(fullText);   
-                ScannerFindInLine(file);
+                //zapiszOCRdoPliku(fullText);
+                //findPattern(fullText);
+                //zapisDoPliku(fullText);
+                //czytaniePliku();
+                FileWriter fw = new FileWriter("paragon.txt");
+                fw.write(fullText);
+                fw.close();
+                findPattern(fullText);
+
+                    
+                
             } catch (TesseractException ex) {
                 Logger.getLogger(Makieta.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (FileNotFoundException ex) {
+            } catch (IOException ex) {
                 Logger.getLogger(Makieta.class.getName()).log(Level.SEVERE, null, ex);
-            }              
-        }       
+            }            
+        }
+        
     }//GEN-LAST:event_jButtonWczytajParagonActionPerformed
     
-    private void findPattern(String text) {
+    private void zapisDoPliku(String fullText) throws IOException {
+
+        FileWriter fw = new FileWriter("paragon.txt");
+        fw.write(fullText);
+        fw.close();
+    }
+    
+    private void czytaniePliku() throws FileNotFoundException, IOException {
+        FileReader fr = new FileReader("paragon.txt");
+	BufferedReader br = new BufferedReader(fr);
+        
+	String s;
+	while((s = br.readLine()) != null && findPatternEnd(s) == true) {
+            jTextAreaProdukty.append(s + "\n");
+	}
+	fr.close();
+    }
+    private void findPattern(String text) throws IOException {
 
         String foundPattern = null;
         Pattern pattern = Pattern.compile("P[AH]R[AH]GON");
         Matcher matcher = pattern.matcher(text);
         if (matcher.find()) {
             foundPattern = matcher.group(0);
+            
             jTextAreaProdukty.append(foundPattern); //prints /{item}/
+            czytaniePliku();
         } else {
             jTextAreaProdukty.append("Nie znaleziono wzorca");
         }
         //return foundPattern;
     }
     
-    public void zapiszOCRdoPliku(File file, String text) {
+//Sprzed. opodatk. H 3,58.
+    
+    public void zapiszOCRdoPliku(String text) {
         
         try {
             PrintWriter zapis = new PrintWriter("OCRdoPliku.txt");
             zapis.println(text);
             zapis.close();
         } catch (FileNotFoundException ex) {
-            System.out.println("Nie mogę zapisać pliku: "+file.getAbsolutePath());
+            System.out.println("Nie mogę zapisać pliku");
             System.out.println("Problem: "+ex);
         }  
     }
-    /*public void readNextLine(File file) {
     
-   FileReader fr = null;
-   String linia = "";
-
-   // OTWIERANIE PLIKU:
-   try {
-     fr = new FileReader(file);
-   } catch (FileNotFoundException e) {
-       System.out.println("BŁĄD PRZY OTWIERANIU PLIKU!");
-       System.exit(1);
-   }
-
-   BufferedReader bfr = new BufferedReader(fr);
-   // ODCZYT KOLEJNYCH LINII Z PLIKU:
-   try {
-     while((linia = bfr.readLine()) != null){
-        //System.out.println(linia);
-        jTextAreaProdukty.append(linia);
-     }
-    } catch (IOException e) {
-        System.out.println("BŁĄD ODCZYTU Z PLIKU!");
-        System.exit(2);
-   }
-
-   // ZAMYKANIE PLIKU
-   try {
-     fr.close();
-    } catch (IOException e) {
-         System.out.println("BŁĄD PRZY ZAMYKANIU PLIKU!");
-         System.exit(3);
-        }
-    }*/
     public void ScannerFindInLine(File file) throws FileNotFoundException {
         
         Scanner scan = new Scanner(file);
